@@ -95,6 +95,7 @@
     <script>
       const template = document.querySelector("template");
 
+      const circleTime = "circle-time";
       const attributes = {
         "component-radius": {
           css: "--radius",
@@ -104,9 +105,12 @@
           css: "--dot-size",
           default: "40px"
         },
-        "circle-time": {
+        [circleTime]: {
           css: "--circle-time",
-          default: "10s"
+          default: "10",
+          prefix: "s",
+          convert: parseInt,
+          proprty: true
         }
       };
 
@@ -128,6 +132,8 @@
 
           this.$dot.addEventListener("mouseenter", this.dotEnter.bind(this));
           this.$dot.addEventListener("mouseleave", this.dotLeave.bind(this));
+
+          this.experienceTimeout = null;
         }
 
         static get observedAttributes() {
@@ -135,7 +141,11 @@
         }
 
         attributeChangedCallback(name, oldValue, newValue) {
-          this.style.setProperty(attributes[name].css, newValue);
+          const attr = attributes[name];
+          this.style.setProperty(attr.css, newValue + (attr.prefix || ""));
+          if (attr.proprty) {
+            this[name] = attr.convert ? attr.convert(newValue) : newValue;
+          }
         }
 
         connectedCallback() {
@@ -154,6 +164,17 @@
         dotEnter() {
           this.$alert.style.backgroundColor = "green";
           this.$message.innerText = "ON";
+
+          if (!this.experienceTimeout) {
+            this.experienceTimeout = setTimeout(
+              this.onFinish.bind(this),
+              this[circleTime] * 1000
+            );
+          }
+        }
+
+        onFinish() {
+          this.$dot.style.webkitAnimationPlayState = "paused";
         }
       }
 
