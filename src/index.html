@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="template.css" />
+</head>
+
+<body>
+    <template>
+        <script>
+            // const dot = document.querySelector("#PursuitRotorTask .dot");
+            // const message = document.querySelector("#PursuitRotorTask .alert span");
+            // const alert = document.querySelector("#PursuitRotorTask .alert");
+            // function dotLeave() {
+            //     alert.style.backgroundColor = 'red'
+            //     message.innerText = 'OFF';
+            // }
+            // function dotEnter() {
+            //     alert.style.backgroundColor = 'green';
+            //     message.innerText = 'ON'
+            // }
+
+            // let timeout;
+            // document.onmousemove = function () {
+            //     clearTimeout(timeout);
+            //     timeout = setTimeout(dotLeave, 600);
+            // }
+
+            // dot.addEventListener('mouseenter', dotEnter);
+            // dot.addEventListener('mouseleave', dotLeave);
+        </script>
+        <style>
+            :host {
+                /* External variables */
+                /* --radius: 100px;
+                --dot-size: 40px;
+                --circle-time: 10s; */
+                /* calculations */
+                --dot-position: calc(var(--radius) - calc(var(--dot-size) / 2));
+                --alert-size: calc(var(--radius) / 2);
+                --alert-position: calc(var(--radius) - calc(var(--alert-size) / 2));
+            }
+
+            #PursuitRotorTask {
+                width: calc(var(--radius) * 2);
+                height: calc(var(--radius) * 2);
+                border: 2px solid #ccc;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+                border-radius: 50%;
+            }
+
+            #dot {
+                position: absolute;
+                width: var(--dot-size);
+                height: var(--dot-size);
+                background: cyan;
+                border-radius: 50%;
+                top: var(--dot-position);
+                bottom: 0;
+                left: var(--dot-position);
+                right: 0;
+                overflow: hidden;
+                animation: circle var(--circle-time) linear infinite;
+            }
+
+            #alert {
+                width: var(--alert-size);
+                height: var(--alert-size);
+                background-color: red;
+                position: absolute;
+                top: var(--alert-position);
+                left: var(--alert-position);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+
+            @keyframes circle {
+                from {
+                    transform: rotate(0deg) translateX(var(--radius));
+                }
+
+                to {
+                    transform: rotate(360deg) translateX(var(--radius));
+                }
+            }
+        </style>
+        <div id="PursuitRotorTask">
+            <div id="dot"></div>
+            <div id="alert">
+                <span>OFF</span>
+            </div>
+        </div>
+    </template>
+    <pursuit-rotor-task />
+    <script>
+        const template = document.querySelector('template');
+
+        class PursuitRotorTask extends HTMLElement {
+
+            constructor() {
+                super();
+                this._shadowRoot = this.attachShadow({ 'mode': 'open' });
+                this._shadowRoot.appendChild(template.content.cloneNode(true));
+
+                this.$dot = this._shadowRoot.getElementById("dot");
+                this.$alert = this._shadowRoot.getElementById("alert")
+                debugger
+                this.$message = this.$alert.querySelector('span');
+
+                let timeout;
+                document.onmousemove = () => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(this.dotLeave.bind(this), 600);
+                }
+
+                this.$dot.addEventListener('mouseenter', this.dotEnter.bind(this));
+                this.$dot.addEventListener('mouseleave', this.dotLeave.bind(this));
+            }
+
+            connectedCallback() {
+                // We set a default attribute here; if our end user hasn't provided one,
+                // our element will display a "placeholder" text instead.
+                if (!this.hasAttribute('radius')) {
+                    this.setAttribute('radius', '400px');
+                }
+
+                this._renderTodoItem();
+            }
+
+            dotLeave() {
+                this.$alert.style.backgroundColor = 'red'
+                this.$message.innerText = 'OFF';
+            }
+
+            dotEnter() {
+                this.$alert.style.backgroundColor = 'green';
+                this.$message.innerText = 'ON'
+            }
+
+            // connectedCallback() {
+            //     // const template = document.querySelector('template');
+            //     const node = document.importNode(template.content, true);
+            //     document.body.appendChild(node);
+            // }
+        }
+
+        customElements.define('pursuit-rotor-task', PursuitRotorTask)
+    </script>
+    <!-- <script lang="javascript">
+        const template = document.querySelector('template');
+        const node = document.importNode(template.content, true);
+        document.body.appendChild(node);
+    </script> -->
+</body>
+
+</html>
