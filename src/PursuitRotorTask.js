@@ -102,6 +102,13 @@ class PursuitRotorTask extends HTMLElement {
     this.$dot.addEventListener("mouseleave", this.dotLeave.bind(this));
 
     this.experienceTimeout = null;
+
+    this.data = {
+      outCount: 0,
+      inTimeMs: null
+    };
+
+    this.temp = null;
   }
 
   static get observedAttributes() {
@@ -125,11 +132,17 @@ class PursuitRotorTask extends HTMLElement {
   }
 
   dotLeave() {
+    if (this.temp) {
+      this.data.inTimeMs += performance.now() - this.temp;
+      this.temp = null;
+      this.data.outCount++;
+    }
     this.$alert.style.backgroundColor = "red";
     this.$message.innerText = "OFF";
   }
 
   dotEnter() {
+    this.temp = performance.now();
     this.$alert.style.backgroundColor = "green";
     this.$message.innerText = "ON";
 
@@ -141,9 +154,17 @@ class PursuitRotorTask extends HTMLElement {
     }
   }
 
+  takeTime() {
+    if (this.enterTime) {
+      this.data.inTimeMs += new Date() - this.enterTime;
+    }
+  }
+
   onFinish() {
+    if (this.temp) this.data.inTimeMs += performance.now() - this.temp;
     this.$dot.style.webkitAnimationPlayState = "paused";
-    this.dispatchEvent(new CustomEvent("finish", { detail: "data" }));
+    console.log(this.data.inTimeMs / 1000);
+    this.dispatchEvent(new CustomEvent("finish", { detail: this.data }));
   }
 }
 
