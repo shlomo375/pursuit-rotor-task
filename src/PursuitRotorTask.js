@@ -4,7 +4,6 @@ class PursuitRotorTask extends HTMLElement {
     const template = document.createElement("template");
     template.innerHTML = `<style>
     :host {
-      /* calculations */
       --dot-position: calc(var(--radius) - var(--dot-radius));
       --alert-size: calc(var(--radius) / 2);
       --alert-position: calc(var(--radius) - calc(var(--alert-size) / 2));
@@ -44,7 +43,7 @@ class PursuitRotorTask extends HTMLElement {
       position: absolute;
       top: var(--alert-position);
       left: var(--alert-position);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       font-weight: bold;
@@ -103,7 +102,9 @@ class PursuitRotorTask extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     const attr = PursuitRotorTask.attributes[name];
-    this.style.setProperty(attr.css, newValue + (attr.prefix || ""));
+    if (attr.css) {
+      this.style.setProperty(attr.css, newValue + (attr.prefix || ""));
+    }
     if (attr.proprty) {
       this[name] = attr.convert ? attr.convert(newValue) : newValue;
     }
@@ -125,6 +126,8 @@ class PursuitRotorTask extends HTMLElement {
       .forEach((attr) =>
         this.setAttribute(attr, PursuitRotorTask.attributes[attr].default)
       );
+    
+    this.showRedAlert()
   }
 
   dotLeave() {
@@ -133,20 +136,38 @@ class PursuitRotorTask extends HTMLElement {
       this.temp = null;
       this.data.outCount++;
     }
-    this.$alert.style.backgroundColor = "red";
-    this.$message.innerText = "OFF";
+    this.showRedAlert();
   }
 
   dotEnter() {
     this.temp = performance.now();
-    this.$alert.style.backgroundColor = "green";
-    this.$message.innerText = "ON";
+    this.showGreenAlert();
 
     if (!this.experienceTimeout) {
       this.experienceTimeout = setTimeout(
         this.onFinish.bind(this),
         this[PursuitRotorTask.circleTime] * 1000
       );
+    }
+  }
+
+  showRedAlert() {
+    if (this[PursuitRotorTask.redAlert]) {
+      this.$alert.style.display = 'flex'
+      this.$alert.style.backgroundColor = "red";
+      this.$message.innerText = "OFF";
+    } else {
+      this.$alert.style.display = 'none'
+    }
+  }
+
+  showGreenAlert() {
+    if (this[PursuitRotorTask.greenAlert]) {
+      this.$alert.style.display = 'flex'
+      this.$alert.style.backgroundColor = "green";
+      this.$message.innerText = "ON";
+    } else {
+      this.$alert.style.display = 'none'
     }
   }
 
@@ -172,6 +193,8 @@ class PursuitRotorTask extends HTMLElement {
   static circleTime = "circle-time";
   static componentR = "component-radius";
   static dotR = "dot-radius";
+  static redAlert = 'red-alert';
+  static greenAlert = 'green-alert';
   static attributes = {
     [PursuitRotorTask.componentR]: {
       css: "--radius",
@@ -181,11 +204,21 @@ class PursuitRotorTask extends HTMLElement {
       css: "--dot-radius",
       default: "40px"
     },
-    [this.circleTime]: {
+    [PursuitRotorTask.circleTime]: {
       css: "--circle-time",
       default: "10",
       prefix: "s",
       convert: parseInt,
+      proprty: true
+    },
+    [PursuitRotorTask.redAlert]: {
+      default: true,
+      convert: (v) => 'true' === v,
+      proprty: true
+    },
+    [PursuitRotorTask.greenAlert]: {
+      default: true,
+      convert: (v) => 'true' === v,
       proprty: true
     }
   };
