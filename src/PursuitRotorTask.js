@@ -166,7 +166,7 @@ class PursuitRotorTask extends HTMLElement {
     const circleTms = circleTs * 1000
     const componentR = componentWidth / 2
     const dotR = dotWidth / 2
-    return (dotR * circleTms) / (2 * Math.PI * componentR);
+    return (dotR * circleTms) / (Math.PI * componentR);
   }
 
   static circleTime = "circle-time";
