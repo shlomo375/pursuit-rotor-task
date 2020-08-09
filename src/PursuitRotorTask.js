@@ -5,7 +5,7 @@ class PursuitRotorTask extends HTMLElement {
     template.innerHTML = `<style>
     :host {
       /* calculations */
-      --dot-position: calc(var(--radius) - calc(var(--dot-size) / 2));
+      --dot-position: calc(var(--radius) - var(--dot-radius));
       --alert-size: calc(var(--radius) / 2);
       --alert-position: calc(var(--radius) - calc(var(--alert-size) / 2));
     }
@@ -25,8 +25,8 @@ class PursuitRotorTask extends HTMLElement {
 
     #dot {
       position: absolute;
-      width: var(--dot-size);
-      height: var(--dot-size);
+      width: calc(var(--dot-radius) * 2);
+      height: calc(var(--dot-radius) * 2);
       background: cyan;
       border-radius: 50%;
       top: var(--dot-position);
@@ -112,7 +112,7 @@ class PursuitRotorTask extends HTMLElement {
       this.onMouseMoveInterval = PursuitRotorTask.ShlomoFormulaForRadiusTime(
         this.getAttribute(PursuitRotorTask.circleTime),
         this.$component.clientWidth,
-        this.$dot.offsetWidth
+        this.$dot.clientWidth
       );
     });
   }
@@ -162,8 +162,11 @@ class PursuitRotorTask extends HTMLElement {
     this.dispatchEvent(new CustomEvent("finish", { detail: this.data }));
   }
 
-  static ShlomoFormulaForRadiusTime(circleTs, componentR, dotR) {
-    return (dotR * circleTs) / (2 * Math.PI * componentR);
+  static ShlomoFormulaForRadiusTime(circleTs, componentWidth, dotWidth) {
+    const circleTms = circleTs * 1000
+    const componentR = componentWidth / 2
+    const dotR = dotWidth / 2
+    return (dotR * circleTms) / (2 * Math.PI * componentR);
   }
 
   static circleTime = "circle-time";
@@ -175,7 +178,7 @@ class PursuitRotorTask extends HTMLElement {
       default: "100px"
     },
     [PursuitRotorTask.dotR]: {
-      css: "--dot-size",
+      css: "--dot-radius",
       default: "40px"
     },
     [this.circleTime]: {
