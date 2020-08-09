@@ -1,22 +1,3 @@
-const circleTime = "circle-time";
-const attributes = {
-  "component-radius": {
-    css: "--radius",
-    default: "100px"
-  },
-  "dot-radius": {
-    css: "--dot-size",
-    default: "40px"
-  },
-  [circleTime]: {
-    css: "--circle-time",
-    default: "10",
-    prefix: "s",
-    convert: parseInt,
-    proprty: true
-  }
-};
-
 class PursuitRotorTask extends HTMLElement {
   constructor() {
     super();
@@ -88,14 +69,19 @@ class PursuitRotorTask extends HTMLElement {
     this._shadowRoot = this.attachShadow({ mode: "open" });
     this._shadowRoot.appendChild(template.content.cloneNode(true));
 
+    this.$component = this._shadowRoot.getElementById("PursuitRotorTask");
     this.$dot = this._shadowRoot.getElementById("dot");
     this.$alert = this._shadowRoot.getElementById("alert");
     this.$message = this.$alert.querySelector("span");
 
-    let timeout;
+    this.onMouseMoveInterval = 600;
+    this.onMouseMoveTimeout = null;
     document.onmousemove = () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(this.dotLeave.bind(this), 600);
+      clearTimeout(this.onMouseMoveTimeout);
+      this.onMouseMoveTimeout = setTimeout(
+        this.dotLeave.bind(this),
+        this.onMouseMoveInterval
+      );
     };
 
     this.$dot.addEventListener("mouseenter", this.dotEnter.bind(this));
@@ -112,23 +98,33 @@ class PursuitRotorTask extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return Object.keys(attributes);
+    return Object.keys(PursuitRotorTask.attributes);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    const attr = attributes[name];
+    const attr = PursuitRotorTask.attributes[name];
     this.style.setProperty(attr.css, newValue + (attr.prefix || ""));
     if (attr.proprty) {
       this[name] = attr.convert ? attr.convert(newValue) : newValue;
     }
+
+    window.requestAnimationFrame(() => {
+      this.onMouseMoveInterval = PursuitRotorTask.ShlomoFormulaForRadiusTime(
+        this.getAttribute(PursuitRotorTask.circleTime),
+        this.$component.clientWidth,
+        this.$dot.offsetWidth
+      );
+    });
   }
 
   connectedCallback() {
     // We set a default attribute here; if our end user hasn't provided one,
     // our element will display a "placeholder" text instead.
-    Object.keys(attributes)
-      .filter(attr => !this.hasAttribute(attr))
-      .forEach(attr => this.setAttribute(attr, attributes[attr].default));
+    Object.keys(PursuitRotorTask.attributes)
+      .filter((attr) => !this.hasAttribute(attr))
+      .forEach((attr) =>
+        this.setAttribute(attr, PursuitRotorTask.attributes[attr].default)
+      );
   }
 
   dotLeave() {
@@ -149,7 +145,7 @@ class PursuitRotorTask extends HTMLElement {
     if (!this.experienceTimeout) {
       this.experienceTimeout = setTimeout(
         this.onFinish.bind(this),
-        this[circleTime] * 1000
+        this[PursuitRotorTask.circleTime] * 1000
       );
     }
   }
@@ -163,9 +159,33 @@ class PursuitRotorTask extends HTMLElement {
   onFinish() {
     if (this.temp) this.data.inTimeMs += performance.now() - this.temp;
     this.$dot.style.webkitAnimationPlayState = "paused";
-    console.log(this.data.inTimeMs / 1000);
     this.dispatchEvent(new CustomEvent("finish", { detail: this.data }));
   }
+
+  static ShlomoFormulaForRadiusTime(circleTs, componentR, dotR) {
+    return (dotR * circleTs) / (2 * Math.PI * componentR);
+  }
+
+  static circleTime = "circle-time";
+  static componentR = "component-radius";
+  static dotR = "dot-radius";
+  static attributes = {
+    [PursuitRotorTask.componentR]: {
+      css: "--radius",
+      default: "100px"
+    },
+    [PursuitRotorTask.dotR]: {
+      css: "--dot-size",
+      default: "40px"
+    },
+    [this.circleTime]: {
+      css: "--circle-time",
+      default: "10",
+      prefix: "s",
+      convert: parseInt,
+      proprty: true
+    }
+  };
 }
 
 customElements.define("pursuit-rotor-task", PursuitRotorTask);
