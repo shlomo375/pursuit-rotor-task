@@ -42,7 +42,9 @@ class PursuitRotorTask extends HTMLElement {
       background-color: red;
       position: absolute;
       top: var(--alert-position);
+      bottom: var(--alert-position);
       left: var(--alert-position);
+      right: var(--alert-position);
       display: none;
       align-items: center;
       justify-content: center;
