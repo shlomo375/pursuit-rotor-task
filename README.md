@@ -3,6 +3,7 @@
 Web Component for Pursuit Rotor Task to embed in web application.
 
 [![jsdelivr badge](https://data.jsdelivr.com/v1/package/npm/pursuit-rotor-task/badge)](https://www.jsdelivr.com/package/npm/pursuit-rotor-task)
+![npm](https://img.shields.io/npm/dy/pursuit-rotor-task?label=npm&style=flat-square)
 
 ## Usage
 
