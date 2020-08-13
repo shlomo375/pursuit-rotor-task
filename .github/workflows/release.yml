@@ -23,7 +23,7 @@ jobs:
         script: |
           const releases = await github.repos.listReleases({
             owner: '${{github.repository_owner}}',
-            repo: '${{github.repository}}'
+            repo: 'pursuit-rotor-task'
           })
           // console.log(releases)
           const published_release_tags = releases.data.filter(release => !release.draft).map(release => release.tag_name)
