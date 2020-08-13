@@ -32,8 +32,7 @@ jobs:
     outputs:
       isRelease: ${{steps.check_release.outputs.result}}
       packageVersion: ${{ env.package_version }}
-  
-  
+
   release:
     needs: [version]
     if: ${{ needs.version.outputs.isRelease == 'true' }}
@@ -50,3 +49,31 @@ jobs:
         release_name: Release ${{ needs.version.outputs.packageVersion }}
         draft: false
         prerelease: false
+
+  publish-gpr:
+    needs: [release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com/
+          scope: '@baruchiro'
+      - run: yarn gpr-setup
+      - run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+  publish-npm:
+    needs: [publish-gpr]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
+      - run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
