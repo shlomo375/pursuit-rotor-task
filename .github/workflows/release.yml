@@ -42,7 +42,7 @@ jobs:
   
   release:
     needs: [version]
-    if: ${{ needs.version.outputs.isRelease }}
+    if: ${{ needs.version.outputs.isRelease == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -59,7 +59,7 @@ jobs:
 
   publish-npm:
     needs: [version]
-    if: ${{ needs.version.outputs.isRelease }}
+    if: ${{ needs.version.outputs.isRelease == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -73,7 +73,7 @@ jobs:
 
   publish-gpr:
     needs: [version]
-    if: ${{ needs.version.outputs.isRelease }}
+    if: ${{ needs.version.outputs.isRelease == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -81,6 +81,6 @@ jobs:
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
-      - run: yarn publish --registry https://npm.pkg.github.com/
+      - run: yarn && yarn publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
