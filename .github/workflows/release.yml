@@ -25,14 +25,8 @@ jobs:
             owner: '${{github.repository_owner}}',
             repo: 'pursuit-rotor-task'
           })
-          // console.log(releases)
           const published_release_tags = releases.data.filter(release => !release.draft).map(release => release.tag_name)
-          // console.log(published_release_tags)
-          // github.event_name: ${{ github.event_name }}
-          // github.ref: ${{ github.ref }}
-          const isPushToMaster = ${{ startsWith(github.event_name, 'push') && github.ref == 'refs/heads/master' }}
-          console.log('Is push to mster: ' + isPushToMaster)
-          const newRelease = !published_release_tags.includes('v${{ env.package_version }}') && isPushToMaster
+          const newRelease = !published_release_tags.includes('v${{ env.package_version }}')
           console.log('newRelease: ' + newRelease)
           return newRelease
     outputs:
@@ -56,31 +50,3 @@ jobs:
         release_name: Release ${{ needs.version.outputs.packageVersion }}
         draft: false
         prerelease: false
-
-  publish-npm:
-    needs: [version]
-    if: ${{ needs.version.outputs.isRelease == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-          registry-url: https://registry.npmjs.org/
-      - run: yarn publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-
-  publish-gpr:
-    needs: [version]
-    if: ${{ needs.version.outputs.isRelease == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-          registry-url: https://npm.pkg.github.com/
-      - run: yarn && yarn publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
