@@ -14,7 +14,7 @@ jobs:
       run: |
         echo ::set-env name=package_version::`awk -F ':' '/version/ {print $2}' package.json | sed 's/\"//g' | sed 's/,//g' | sed 's/ //g'`
         echo "Version is `awk -F ':' '/version/ {print $2}' package.json | sed 's/\"//g' | sed 's/,//g' | sed 's/ //g'`"
-    - uses: actions/github-script@0.3.0
+    - uses: actions/github-script@v2.0.1
       name: Check if current version is a published release (by release tag)
       id: check_release
       with:
@@ -22,8 +22,8 @@ jobs:
         # debug: true
         script: |
           const releases = await github.repos.listReleases({
-            owner: 'baruchiro',
-            repo: 'israeli-bank-scrapers-desktop'
+            owner: ${{github.repository_owner}},
+            repo: ${{github.repository}}
           })
           // console.log(releases)
           const published_release_tags = releases.data.filter(release => !release.draft).map(release => release.tag_name)
