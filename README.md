@@ -1,6 +1,8 @@
 # pursuit-rotor-task
 Web Component for Pursuit Rotor Task to embed in web application.
 
+[![](https://data.jsdelivr.com/v1/package/gh/baruchiro/pursuit-rotor-task/badge)](https://www.jsdelivr.com/package/gh/baruchiro/pursuit-rotor-task)
+
 ## Usage
 
 The Web Component source code is in Github Pages of this repository. To use in an HTML document, just add the script and use the component:
