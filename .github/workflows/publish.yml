@@ -2,7 +2,10 @@ name: Publish npm package
 
 on:
   release:
-    types: [released]
+    types:
+      - released
+      - published
+      - created
 
 jobs:
   publish-npm:
