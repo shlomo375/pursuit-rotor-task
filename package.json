@@ -6,6 +6,9 @@
     "repository": "https://github.com/baruchiro/pursuit-rotor-task.git",
     "author": "Baruch Odem <baruchiro@gmail.com>",
     "license": "MIT",
-    "keywords": ["WebComponent", "PursuitRotorTask", "animation", "psychology"]
+    "keywords": ["WebComponent", "PursuitRotorTask", "animation", "psychology"],
+    "scripts": {
+      "gpr-setup": "node .github/scripts/gpr.js"
+    }
   }
   
