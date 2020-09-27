@@ -165,13 +165,10 @@ class PursuitRotorTask extends HTMLElement {
   }
 
   startAnimation = () => {
-    const initPrm = this[PursuitRotorTask.timer] > 0 ? this.countDown() : Promise.resolve()
+    const initPrm = this[PursuitRotorTask.timer] > 0 ? this.countDown() : Promise.resolve(this.showRedAlert())
     initPrm
-      .then(this.showRedAlert)
       .then(this.registerMouseEvents)
-      .then(() => {
-        this.$dot.style.webkitAnimationPlayState = "running"
-      })
+      .then(() => this.$dot.style.webkitAnimationPlayState = "running")
   }
 
   startExperienceTimeout = () => {
@@ -184,7 +181,7 @@ class PursuitRotorTask extends HTMLElement {
   }
 
   registerMouseEvents = () => {
-    this.$dot.addEventListener("mouseenter", this.dotEnter);
+    this.$dot.addEventListener("mousemove", this.dotEnter, { once: true });
     this.$dot.addEventListener("mouseleave", this.dotLeave);
 
     document.onmousemove = () => {
@@ -207,6 +204,8 @@ class PursuitRotorTask extends HTMLElement {
     this.showGreenAlert();
 
     this.startExperienceTimeout()
+
+    this.$dot.addEventListener("mouseenter", this.dotEnter);
   }
 
   showRedAlert = () => {
@@ -247,6 +246,7 @@ class PursuitRotorTask extends HTMLElement {
         this.$message.innerText = --count;
         if (count <= 0) {
           clearInterval(intervalId)
+          this.showRedAlert()
           resolve()
         }
       }, 1000)
