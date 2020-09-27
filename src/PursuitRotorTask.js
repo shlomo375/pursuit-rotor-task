@@ -1,4 +1,44 @@
 class PursuitRotorTask extends HTMLElement {
+
+  static circleTime = "circle-time";
+  static componentR = "component-radius";
+  static dotR = "dot-radius";
+  static redAlert = 'red-alert';
+  static greenAlert = 'green-alert';
+  static timer = 'timer';
+  static attributes = {
+    [PursuitRotorTask.componentR]: {
+      css: "--radius",
+      default: "100px"
+    },
+    [PursuitRotorTask.dotR]: {
+      css: "--dot-radius",
+      default: "40px"
+    },
+    [PursuitRotorTask.circleTime]: {
+      css: "--circle-time",
+      default: "10",
+      prefix: "s",
+      convert: parseInt,
+      proprty: true
+    },
+    [PursuitRotorTask.redAlert]: {
+      default: true,
+      convert: (v) => 'true' === v,
+      proprty: true
+    },
+    [PursuitRotorTask.greenAlert]: {
+      default: true,
+      convert: (v) => 'true' === v,
+      proprty: true
+    },
+    [PursuitRotorTask.timer]: {
+      default: "0",
+      convert: parseInt,
+      proprty: true
+    }
+  };
+
   constructor() {
     super();
     const template = document.createElement("template");
@@ -77,22 +117,14 @@ class PursuitRotorTask extends HTMLElement {
 
     this.onMouseMoveInterval = 600;
     this.onMouseMoveTimeout = null;
-    document.onmousemove = () => {
-      clearTimeout(this.onMouseMoveTimeout);
-      this.onMouseMoveTimeout = setTimeout(
-        this.dotLeave.bind(this),
-        this.onMouseMoveInterval
-      );
-    };
 
-    this.$dot.addEventListener("mouseenter", this.dotEnter.bind(this));
-    this.$dot.addEventListener("mouseleave", this.dotLeave.bind(this));
+    this.$dot.style.webkitAnimationPlayState = "paused"
 
     this.experienceTimeout = null;
 
     this.data = {
       outCount: 0,
-      inTimeMs: null
+      inTimeMs: 0
     };
 
     this.temp = null;
@@ -128,11 +160,40 @@ class PursuitRotorTask extends HTMLElement {
       .forEach((attr) =>
         this.setAttribute(attr, PursuitRotorTask.attributes[attr].default)
       );
-    
-    this.showRedAlert()
+
+    this.startAnimation()
   }
 
-  dotLeave() {
+  startAnimation = () => {
+    const initPrm = this[PursuitRotorTask.timer] > 0 ? this.countDown() : Promise.resolve()
+    initPrm
+      .then(this.showRedAlert)
+      .then(this.registerMouseEvents)
+      .then(() => {
+        this.$dot.style.webkitAnimationPlayState = "running"
+      })
+  }
+
+  startExperienceTimeout = () => {
+    if (!this.experienceTimeout) {
+      this.experienceTimeout = setTimeout(
+        this.onFinish,
+        this[PursuitRotorTask.circleTime] * 1000
+      );
+    }
+  }
+
+  registerMouseEvents = () => {
+    this.$dot.addEventListener("mouseenter", this.dotEnter);
+    this.$dot.addEventListener("mouseleave", this.dotLeave);
+
+    document.onmousemove = () => {
+      clearTimeout(this.onMouseMoveTimeout);
+      this.onMouseMoveTimeout = setTimeout(this.dotLeave, this.onMouseMoveInterval);
+    };
+  }
+
+  dotLeave = () => {
     if (this.temp) {
       this.data.inTimeMs += performance.now() - this.temp;
       this.temp = null;
@@ -141,19 +202,14 @@ class PursuitRotorTask extends HTMLElement {
     this.showRedAlert();
   }
 
-  dotEnter() {
+  dotEnter = () => {
     this.temp = performance.now();
     this.showGreenAlert();
 
-    if (!this.experienceTimeout) {
-      this.experienceTimeout = setTimeout(
-        this.onFinish.bind(this),
-        this[PursuitRotorTask.circleTime] * 1000
-      );
-    }
+    this.startExperienceTimeout()
   }
 
-  showRedAlert() {
+  showRedAlert = () => {
     if (this[PursuitRotorTask.redAlert]) {
       this.$alert.style.display = 'flex'
       this.$alert.style.backgroundColor = "red";
@@ -163,7 +219,7 @@ class PursuitRotorTask extends HTMLElement {
     }
   }
 
-  showGreenAlert() {
+  showGreenAlert = () => {
     if (this[PursuitRotorTask.greenAlert]) {
       this.$alert.style.display = 'flex'
       this.$alert.style.backgroundColor = "green";
@@ -173,13 +229,32 @@ class PursuitRotorTask extends HTMLElement {
     }
   }
 
-  takeTime() {
+  takeTime = () => {
     if (this.enterTime) {
       this.data.inTimeMs += new Date() - this.enterTime;
     }
   }
 
-  onFinish() {
+  countDown = () => {
+    return new Promise((resolve) => {
+
+      let count = this[PursuitRotorTask.timer]
+      this.$alert.style.display = 'flex'
+      this.$alert.style.backgroundColor = "gray";
+      this.$message.innerText = count;
+
+      const intervalId = setInterval(() => {
+        this.$message.innerText = --count;
+        if (count <= 0) {
+          clearInterval(intervalId)
+          resolve()
+        }
+      }, 1000)
+
+    }).then(this.startExperienceTimeout)
+  }
+
+  onFinish = () => {
     if (this.temp) this.data.inTimeMs += performance.now() - this.temp;
     this.$dot.style.webkitAnimationPlayState = "paused";
     this.dispatchEvent(new CustomEvent("finish", { detail: this.data }));
@@ -191,39 +266,6 @@ class PursuitRotorTask extends HTMLElement {
     const dotR = dotWidth / 2
     return (dotR * circleTms) / (Math.PI * componentR);
   }
-
-  static circleTime = "circle-time";
-  static componentR = "component-radius";
-  static dotR = "dot-radius";
-  static redAlert = 'red-alert';
-  static greenAlert = 'green-alert';
-  static attributes = {
-    [PursuitRotorTask.componentR]: {
-      css: "--radius",
-      default: "100px"
-    },
-    [PursuitRotorTask.dotR]: {
-      css: "--dot-radius",
-      default: "40px"
-    },
-    [PursuitRotorTask.circleTime]: {
-      css: "--circle-time",
-      default: "10",
-      prefix: "s",
-      convert: parseInt,
-      proprty: true
-    },
-    [PursuitRotorTask.redAlert]: {
-      default: true,
-      convert: (v) => 'true' === v,
-      proprty: true
-    },
-    [PursuitRotorTask.greenAlert]: {
-      default: true,
-      convert: (v) => 'true' === v,
-      proprty: true
-    }
-  };
 }
 
 customElements.define("pursuit-rotor-task", PursuitRotorTask);
