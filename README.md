@@ -41,6 +41,7 @@ You can look on the `docs/index.html` file (also available in Github Pages [here
 - `circle-time` The number of seconds to complete a round. Default: `"10"`.
 - `red-alert` Show **red** alert when the user mouse is **out** the rotor. Default: `"true"`
 - `green-alert` Show **green** alert when the user mouse is **in** the rotor. Default: `"true"`
+- `timer` Count down seconds before the experiment start. Default: `"0"`. (If the value is `0`, the experiment will start when the user on the rotor)
 
 ### Finish
 
