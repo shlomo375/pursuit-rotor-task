@@ -1,6 +1,7 @@
 class PursuitRotorTask extends HTMLElement {
 
   static circleTime = "circle-time";
+  static numOfCircle = "num-of-circle";
   static componentR = "component-radius";
   static dotR = "dot-radius";
   static redAlert = 'red-alert';
@@ -18,6 +19,13 @@ class PursuitRotorTask extends HTMLElement {
     [PursuitRotorTask.circleTime]: {
       css: "--circle-time",
       default: "10",
+      prefix: "s",
+      convert: parseInt,
+      proprty: true
+    },
+    [PursuitRotorTask.numOfCircle]: {
+      css: "--num-of-circle",
+      default: "1",
       prefix: "s",
       convert: parseInt,
       proprty: true
@@ -145,7 +153,7 @@ class PursuitRotorTask extends HTMLElement {
 
     window.requestAnimationFrame(() => {
       this.onMouseMoveInterval = PursuitRotorTask.ShlomoFormulaForRadiusTime(
-        this.getAttribute(PursuitRotorTask.circleTime),
+        this.getAttribute(PursuitRotorTask.circleTime*PursuitRotorTask.numOfCircle),
         this.$component.clientWidth,
         this.$dot.clientWidth
       );
